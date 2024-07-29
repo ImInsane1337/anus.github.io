@@ -5,6 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Clicker</title>
     <style>
+        /* Основной стиль для контейнера */
+#container {
+    max-width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* Стили для панели обновлений */
+#upgrade-panel {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* Стили для кнопок обновления */
+.upgrade-option {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Стили для текста бонуса */
+.bonus-text {
+    font-size: 16px;
+    padding: 5px;
+}
+
+/* Обновление интерфейса для маленьких экранов */
+@media (max-width: 600px) {
+    .upgrade-option {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
         /* Стили для страницы */
         body {
             font-family: 'Arial', sans-serif;
