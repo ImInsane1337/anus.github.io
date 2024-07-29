@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #1c1c1c;
+            color: #e6e6e6;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border: 1px solid #444;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 10px;
+        }
+        th {
+            background-color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #2c2c2c;
+        }
+        tr:nth-child(odd) {
+            background-color: #1c1c1c;
+        }
+        .back-button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #fff;
+            background-color: #d9534f; /* Опиумный красный */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #c9302c; /* Темнее на ховер */
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <h1>Таблица лидеров</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Никнейм</th>
+                <th>Счёт</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+            <!-- Содержимое таблицы будет вставлено с помощью JavaScript -->
+        </tbody>
+    </table>
+    <a href="index.html" class="back-button">Назад</a>
+
+    <script>
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (const cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.split('=');
+                if (cookieName.trim() === name) {
+                    return decodeURIComponent(cookieValue.trim());
+                }
+            }
+            return null;
+        }
+
+        function decrypt(text, key) {
+            return text.split('').map((char, index) => String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(index % key.length))).join('');
+        }
+
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num;
+        }
+
+        function updateLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            const encryptionKey = 'supersecretkey';
+            const encryptedCount = getCookie('counter');
+            const nickname = getCookie('nickname') || 'Неизвестный';
+            let count = 0;
+            if (encryptedCount) {
+                count = parseInt(decrypt(encryptedCount, encryptionKey), 10);
+            }
+            leaderboardBody.innerHTML = 
+                <tr>
+                    <td>${nickname}</td>
+                    <td>${formatNumber(count)}</td>
+                </tr>
+            ;
+        }
+
+        updateLeaderboard();
+    </script>
+</body>
+</html>
