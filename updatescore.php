@@ -1,8 +1,10 @@
 <?php
-$servername = "89.23.117.121";
-$username = "ImInsane";
-$password = "Fade3322"; // Укажите свой пароль
+// Подключение к базе данных
+$servername = "localhost";
+$username = "root";
+$password = "";
 $dbname = "leaderboard";
+
 // Создание подключения
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -14,14 +16,11 @@ if ($conn->connect_error) {
 // Получение данных из POST запроса
 $data = json_decode(file_get_contents('php://input'), true);
 $score = intval($data['score']);
-$ip = $_SERVER['REMOTE_ADDR']; // IP-адрес клиента
-
-// Получение имени пользователя
 $nickname = $data['nickname'] ?? 'Anonymous';
 
 // Обновление счёта в базе данных
-$stmt = $conn->prepare("INSERT INTO scores (ip, score, nickname) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE score = ?");
-$stmt->bind_param("sisi", $ip, $score, $nickname, $score);
+$stmt = $conn->prepare("INSERT INTO scores (nickname, score) VALUES (?, ?) ON DUPLICATE KEY UPDATE score = ?");
+$stmt->bind_param("sis", $nickname, $score, $score);
 
 if ($stmt->execute()) {
     echo json_encode(["status" => "success"]);

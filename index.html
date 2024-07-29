@@ -11,7 +11,18 @@
             color: #d1cfcf; /* Светлый цвет текста */
             text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 1)), url('your-background-image.jpg') no-repeat center center fixed; /* Опиумный фон */
+            background-size: cover;
         }
         .leaderboard-button {
             margin: 20px;
@@ -30,17 +41,17 @@
             background-color: #c9302c; /* Темнее на ховер */
             transform: scale(1.05);
         }
+        .counter {
+            font-size: 3rem;
+            margin-top: 20px;
+            color: #e6b800; /* Яркий цвет счётчика */
+            text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.8); /* Тень текста */
+        }
         .coin-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 80vh;
             position: relative;
-        }
-        .counter {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #e6b800; /* Яркий цвет счётчика */
         }
         .coin {
             width: 150px;
@@ -65,31 +76,44 @@
             user-select: none;
             text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6); /* Тень текста */
         }
-        @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0); }
+        .back-button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #fff;
+            background-color: #d9534f; /* Опиумный красный */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
-        .coin-container::before {
-            content: ' ';
+        .back-button:hover {
+            background-color: #c9302c; /* Темнее на ховер */
+            transform: scale(1.05);
+        }
+        .blurred-overlay {
             position: absolute;
-            width: 100%;
-            height: 100%;
             top: 0;
             left: 0;
-            background: radial-gradient(circle, rgba(255, 87, 34, 0.3), rgba(0, 0, 0, 0.7));
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Полупрозрачный серый фон */
             z-index: -1;
-            animation: float 3s ease-in-out infinite;
         }
     </style>
 </head>
 <body>
-    <button class="leaderboard-button" onclick="window.location.href='leaderboard.html'">Таблица лидеров</button>
-    <div class="coin-container" id="coin-container">
+    <div class="container">
         <div class="counter" id="counter">0</div>
-        <div class="coin" id="coin">
-            <div class="coin-text">anus</div>
+        <div class="coin-container">
+            <div class="coin" id="coin">
+                <div class="coin-text">anus</div>
+            </div>
         </div>
+        <button class="leaderboard-button" onclick="window.location.href='leaderboard.php'">Таблица лидеров</button>
+        <div class="blurred-overlay"></div>
     </div>
 
     <script>
@@ -121,6 +145,14 @@
             return getCookie('nickname') || askForNickname();
         }
 
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num;
+        }
+
         function updateScore() {
             const count = parseInt(document.getElementById('counter').textContent, 10);
             const nickname = getNickname();
@@ -144,15 +176,18 @@
             let count = parseInt(document.getElementById('counter').textContent, 10);
             if (isNaN(count)) count = 0;
             count++;
-            document.getElementById('counter').textContent = count;
+            document.getElementById('counter').textContent = formatNumber(count);
         });
 
         // Обновление счётчика каждые 5 секунд
         setInterval(updateScore, 5000);
 
         // Инициализация счётчика при загрузке страницы
-        document.getElementById('counter').textContent = '0';
-        updateScore();
+        function initCounter() {
+            const count = getCookie('counter');
+            document.getElementById('counter').textContent = count ? formatNumber(parseInt(count, 10)) : '0';
+        }
+        initCounter();
     </script>
 </body>
 </html>
