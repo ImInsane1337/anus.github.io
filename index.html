@@ -67,9 +67,7 @@
     </div>
 
     <script>
-        // Шифрование и дешифрование значений в JavaScript
         function encrypt(value) {
-            // Используйте библиотеку для шифрования, например CryptoJS
             return btoa(value); // Простой base64 для примера
         }
 
@@ -87,14 +85,15 @@
             for (const cookie of cookies) {
                 const [cookieName, cookieValue] = cookie.split('=');
                 if (cookieName.trim() === name) {
-                    return decrypt(cookieValue.trim());
+                    return decrypt(cookieValue.trim()) || '0'; // Возвращаем '0', если значение пустое
                 }
             }
-            return null;
+            return '0';
         }
 
         document.getElementById('coin').addEventListener('click', () => {
-            let count = parseInt(getDecryptedCookie('counter') || '0');
+            let count = parseInt(getDecryptedCookie('counter'), 10);
+            if (isNaN(count)) count = 0;
             count++;
             setEncryptedCookie('counter', count);
             document.getElementById('counter').textContent = count;
@@ -109,7 +108,7 @@
         });
 
         // Инициализация счётчика при загрузке страницы
-        document.getElementById('counter').textContent = getDecryptedCookie('counter') || '0';
+        document.getElementById('counter').textContent = getDecryptedCookie('counter');
     </script>
 </body>
 </html>
