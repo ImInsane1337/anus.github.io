@@ -1,8 +1,8 @@
 <?php
 // Подключение к базе данных
-$servername = "localhost";
-$username = "root";
-$password = "";
+$servername = "89.23.117.121";
+$username = "ImInsane";
+$password = "Fade3322"; // Укажите свой пароль
 $dbname = "leaderboard";
 
 // Создание подключения
