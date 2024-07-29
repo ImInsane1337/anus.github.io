@@ -1,15 +1,15 @@
 <?php
-// updateScore.php
+require_once 'encrypt.php'; // Подключаем файл с функциями шифрования
 
-$servername = "localhost";
-$username = "root";
-$password = "";
+$servername = "89.23.117.121";
+$username = "ImInsane";
+$password = "Fade3322"; // Укажите свой пароль
 $dbname = "leaderboard";
+
 
 // Создание подключения
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Проверка подключения
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -17,10 +17,9 @@ if ($conn->connect_error) {
 // Получаем данные из POST запроса
 $data = json_decode(file_get_contents('php://input'), true);
 $score = intval($data['score']);
-$ip = $_SERVER['REMOTE_ADDR']; // Можно использовать IP для идентификации пользователя
+$encrypted_ip = $_SERVER['REMOTE_ADDR']; // Используйте зашифрованный IP, если необходимо
 
-// Вставка или обновление данных в базе данных
-$sql = "INSERT INTO scores (ip, score) VALUES ('$ip', $score)
+$sql = "INSERT INTO scores (ip, score) VALUES ('$encrypted_ip', $score)
         ON DUPLICATE KEY UPDATE score = $score";
 
 if ($conn->query($sql) === TRUE) {
