@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Coin with Leaderboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #1d1d1d;
+            color: #f5f5f5;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .leaderboard-button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #ffffff;
+            background-color: #ff5722;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+        .leaderboard-button:hover {
+            background-color: #e64a19;
+        }
+        .coin-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        .counter {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .coin {
+            width: 150px;
+            height: 150px;
+            background-color: #ff5722;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+        .coin-text {
+            font-size: 1.5rem;
+            color: #ffffff;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="leaderboard-button" onclick="window.location.href='leaderboard.php'">Таблица лидеров</button>
+    <div class="coin-container" id="coin-container">
+        <div class="counter" id="counter">0</div>
+        <div class="coin" id="coin">
+            <div class="coin-text">anus</div>
+        </div>
+    </div>
+
+    <script>
+        // Шифрование и дешифрование значений в JavaScript
+        function encrypt(value) {
+            // Используйте библиотеку для шифрования, например CryptoJS
+            return btoa(value); // Простой base64 для примера
+        }
+
+        function decrypt(value) {
+            return atob(value); // Простой base64 для примера
+        }
+
+        function setEncryptedCookie(name, value) {
+            const encryptedValue = encrypt(value);
+            document.cookie = `${name}=${encryptedValue}; path=/;`;
+        }
+
+        function getDecryptedCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (const cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.split('=');
+                if (cookieName.trim() === name) {
+                    return decrypt(cookieValue.trim());
+                }
+            }
+            return null;
+        }
+
+        document.getElementById('coin').addEventListener('click', () => {
+            let count = parseInt(getDecryptedCookie('counter') || '0');
+            count++;
+            setEncryptedCookie('counter', count);
+            document.getElementById('counter').textContent = count;
+
+            fetch('updateScore.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ score: count }),
+            });
+        });
+
+        // Инициализация счётчика при загрузке страницы
+        document.getElementById('counter').textContent = getDecryptedCookie('counter') || '0';
+    </script>
+</body>
+</html>
