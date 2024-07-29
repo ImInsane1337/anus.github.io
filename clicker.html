@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Coin with Upgrades</title>
     <style>
+        /* Стили для страницы */
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
-            color: #d1cfcf;
+            background: linear-gradient(135deg, #1f1f1f, #2c2c2c); /* Градиентный фон */
+            color: #d1cfcf; /* Светлый цвет текста */
             text-align: center;
             margin: 0;
             padding: 0;
@@ -22,12 +23,12 @@
             height: 100vh;
             position: relative;
         }
-        .leaderboard-button, .upgrade-button {
+        .leaderboard-button, .upgrade-button, .mod-button {
             margin: 20px;
             padding: 10px 20px;
             font-size: 1.2rem;
             color: #fff;
-            background-color: #d9534f;
+            background-color: #d9534f; /* Опиумный красный */
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -35,15 +36,15 @@
             display: inline-block;
             transition: background-color 0.3s ease, transform 0.3s ease;
         }
-        .leaderboard-button:hover, .upgrade-button:hover {
-            background-color: #c9302c;
+        .leaderboard-button:hover, .upgrade-button:hover, .mod-button:hover {
+            background-color: #c9302c; /* Темнее на ховер */
             transform: scale(1.05);
         }
         .counter {
             font-size: 3rem;
             margin-top: 20px;
-            color: #e6b800;
-            text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.8);
+            color: #e6b800; /* Яркий цвет счётчика */
+            text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.8); /* Тень текста */
         }
         .coin-container {
             display: flex;
@@ -54,14 +55,14 @@
         .coin {
             width: 150px;
             height: 150px;
-            background: radial-gradient(circle, #ff5722, #d43f2f);
+            background: radial-gradient(circle, #ff5722, #d43f2f); /* Градиент цвета */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             position: relative;
-            box-shadow: 0 0 20px rgba(255, 87, 34, 0.8);
+            box-shadow: 0 0 20px rgba(255, 87, 34, 0.8); /* Эффект свечения */
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .coin:hover {
@@ -72,14 +73,14 @@
             font-size: 1.5rem;
             color: #fff;
             user-select: none;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6); /* Тень текста */
         }
         .back-button {
             margin: 20px;
             padding: 10px 20px;
             font-size: 1.2rem;
             color: #fff;
-            background-color: #d9534f;
+            background-color: #d9534f; /* Опиумный красный */
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -88,7 +89,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease;
         }
         .back-button:hover {
-            background-color: #c9302c;
+            background-color: #c9302c; /* Темнее на ховер */
             transform: scale(1.05);
         }
         .upgrade-panel {
@@ -153,9 +154,8 @@
             font-size: 1.2rem;
             user-select: none;
             opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition: opacity 0.2s ease, transform 0.2s ease;
             font-family: 'Courier New', monospace;
-            white-space: nowrap;
         }
         @keyframes bonusAnimation {
             0% {
@@ -171,13 +171,12 @@
                 transform: translateY(-100px) rotate(10deg);
             }
         }
-        .bonus-container {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            pointer-events: none;
-            width: 100%;
+        @keyframes rgbPulse {
+            0% { background: red; }
+            25% { background: green; }
+            50% { background: blue; }
+            75% { background: yellow; }
+            100% { background: red; }
         }
     </style>
 </head>
@@ -193,15 +192,15 @@
             <div>Уровень авто-кликера: <span id="auto-clicker-level">0</span> (Скорость: <span id="auto-clicker-speed">5000</span> мс)</div>
             <div>Уровень усиления клика: <span id="clickpower-level">0</span> (Сила: <span id="clickpower-power">1</span>)</div>
         </div>
-        <button class="leaderboard-button" onclick="window.location.href='leaderboard.html'">Таблица лидеров</button>
-        <button class="upgrade-button" onclick="toggleUpgradePanel()">Улучшения</button>
+        <button class="upgrade-button" onclick="toggleUpgradePanel()">Обновления</button>
         <div class="upgrade-panel" id="upgrade-panel">
-            <div class="upgrade-option" onclick="buyUpgrade('autoclick')">Авто-клик (цена: <span id="autoclick-cost">100</span>)</div>
+            <div class="upgrade-option" onclick="buyUpgrade('autoclick')">Авто-кликер (цена: <span id="autoclick-cost">100</span>)</div>
             <div class="upgrade-option" onclick="buyUpgrade('clickpower')">Усиление клика (цена: <span id="clickpower-cost">50</span>)</div>
+            <button class="back-button" onclick="toggleUpgradePanel()">Назад</button>
         </div>
-        <div class="auto-clicker" id="auto-clicker"></div>
-        <div class="bonus-container" id="bonus-container"></div>
+        <div id="bonus-container"></div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

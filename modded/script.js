@@ -1,11 +1,12 @@
-const encryptionKey = 'supersecretkey';
-
+const encryptionKey = 'Vm0xd1IxVXhSWGxTV0doWVYwZDRWMWxyWkc5V1JteHlXa1JTVjJKR2NIbFdWM1JMVlVaV1ZVMUVhejA9'; // Вы можете изменить на более сложный ключ
+let autoClickIntervalId = null;
 function encrypt(text, key) {
-    return text.split('').map((char, index) => String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(index % key.length))).join('');
+    return CryptoJS.AES.encrypt(text, key).toString();
 }
 
 function decrypt(text, key) {
-    return encrypt(text, key);
+    const bytes = CryptoJS.AES.decrypt(text, key);
+    return bytes.toString(CryptoJS.enc.Utf8);
 }
 
 function getCookie(name) {
@@ -39,20 +40,20 @@ function getNickname() {
 }
 
 function formatNumber(num) {
-    if (num >= 1e42) return (num / 1e42).toFixed(1) + ' Tr';
-    if (num >= 1e39) return (num / 1e39).toFixed(1) + ' Dd';
-    if (num >= 1e36) return (num / 1e36).toFixed(1) + ' U';
-    if (num >= 1e33) return (num / 1e33).toFixed(1) + ' D';
-    if (num >= 1e30) return (num / 1e30).toFixed(1) + ' N';
-    if (num >= 1e27) return (num / 1e27).toFixed(1) + ' Oc';
-    if (num >= 1e24) return (num / 1e24).toFixed(1) + ' Sp';
-    if (num >= 1e21) return (num / 1e21).toFixed(1) + ' Sx';
-    if (num >= 1e18) return (num / 1e18).toFixed(1) + ' Qi';
-    if (num >= 1e15) return (num / 1e15).toFixed(1) + ' Qa';
-    if (num >= 1e12) return (num / 1e12).toFixed(1) + ' T';
-    if (num >= 1e9) return (num / 1e9).toFixed(1) + ' B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + ' M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + ' K';
+    if (num >= 1e42) return (num / 1e42).toFixed(1) + 'Td'; // Тредециллион
+    if (num >= 1e39) return (num / 1e39).toFixed(1) + 'Dd'; // Дециллион
+    if (num >= 1e36) return (num / 1e36).toFixed(1) + 'Nd'; // Нониллион
+    if (num >= 1e33) return (num / 1e33).toFixed(1) + 'Od'; // Октиллион
+    if (num >= 1e30) return (num / 1e30).toFixed(1) + 'Sx'; // Секстиллион
+    if (num >= 1e27) return (num / 1e27).toFixed(1) + 'Sp'; // Септиллион
+    if (num >= 1e24) return (num / 1e24).toFixed(1) + 'Qd'; // Квинтиллион
+    if (num >= 1e21) return (num / 1e21).toFixed(1) + 'Qt'; // Квадриллион
+    if (num >= 1e18) return (num / 1e18).toFixed(1) + 'Qn'; // Квинтиллион
+    if (num >= 1e15) return (num / 1e15).toFixed(1) + 'Tr'; // Триллион
+    if (num >= 1e12) return (num / 1e12).toFixed(1) + 'B';  // Миллиард
+    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';  // Миллиард
+    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';  // Миллион
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';  // Тысяча
     return num;
 }
 
@@ -64,7 +65,7 @@ const bonusContainer = document.getElementById('bonus-container');
 let bonusQueue = [];
 
 function initCounter() {
-    const encryptedCount = getCookie('counter');
+    const encryptedCount = getCookie('mod_counter');
     if (encryptedCount) {
         const decryptedCount = decrypt(encryptedCount, encryptionKey);
         count = parseInt(decryptedCount, 10);
@@ -75,27 +76,54 @@ function initCounter() {
 }
 
 function updateCounter() {
-    document.getElementById('counter').textContent = formatNumber(count);
+    document.getElementById('mod_counter').textContent = formatNumber(count);
     const encryptedCount = encrypt(count.toString(), encryptionKey);
-    setCookie('counter', encryptedCount);
+    setCookie('mod_counter', encryptedCount);
 }
 
 function updateUpgradeInfo() {
-    const upgrades = JSON.parse(decrypt(getCookie('upgrades') || '{}', encryptionKey));
-    document.getElementById('clickpower-level').textContent = upgrades.clickpower || 0;
-    document.getElementById('auto-clicker-level').textContent = upgrades.autoclick || 0;
+    const upgrades = parseUpgrades(decrypt(getCookie('mod_upgrades') || '', encryptionKey));
+    document.getElementById('clickpower-level').textContent = upgrades.clickpower.level || 0;
+    document.getElementById('auto-clicker-level').textContent = upgrades.autoclick.level || 0;
     document.getElementById('clickpower-power').textContent = clickPower.toFixed(1);
     document.getElementById('auto-clicker-speed').textContent = autoClickInterval;
-    document.getElementById('autoclick-cost').textContent = (upgrades.autoclick ? 100 * (upgrades.autoclick + 1) : 100);
-    document.getElementById('clickpower-cost').textContent = (upgrades.clickpower ? 50 * (upgrades.clickpower + 1) : 50);
+    document.getElementById('autoclick-cost').textContent = (upgrades.autoclick.level ? 100 * (upgrades.autoclick.level + 1) : 100);
+    document.getElementById('clickpower-cost').textContent = (upgrades.clickpower.level ? 50 * (upgrades.clickpower.level + 1) : 50);
+}
+
+function parseUpgrades(data) {
+    const upgrades = {
+        clickpower: { level: 0, power: 1 },
+        autoclick: { level: 0, interval: 5000 }
+    };
+    const parts = data.split(';');
+    parts.forEach(part => {
+        const [type, level, value] = part.split('-');
+        if (type === 'clickpower') {
+            upgrades.clickpower.level = parseInt(level, 10);
+            upgrades.clickpower.power = parseFloat(value);
+            clickPower = upgrades.clickpower.power;
+        } else if (type === 'autoclick') {
+            upgrades.autoclick.level = parseInt(level, 10);
+            upgrades.autoclick.interval = parseInt(value, 10);
+            autoClickInterval = upgrades.autoclick.interval;
+            startAutoClicker(); // Перезапускаем автокликер с новым интервалом
+        }
+    });
+    return upgrades;
+}
+
+function formatUpgrades(upgrades) {
+    return `clickpower-${upgrades.clickpower.level}-${upgrades.clickpower.power};autoclick-${upgrades.autoclick.level}-${upgrades.autoclick.interval}`;
 }
 
 document.getElementById('coin').addEventListener('click', () => {
     count += clickPower;
     updateCounter();
     showBonus();
-    applyClickEffect();
 });
+
+
 
 function showBonus() {
     if (bonusQueue.length >= 5) {
@@ -124,74 +152,244 @@ function showBonus() {
     bonusQueue.push(newBonus);
 }
 
-function applyClickEffect() {
-    const coin = document.getElementById('coin');
-    coin.classList.add('click-effect');
-    setTimeout(() => {
-        coin.classList.remove('click-effect');
-    }, 200); // Удаляем класс через 200ms, чтобы эффект завершился
-}
-
 function toggleUpgradePanel() {
     const upgradePanel = document.getElementById('upgrade-panel');
     upgradePanel.classList.toggle('visible');
 }
 
-function buyUpgrade(upgrade) {
-    let upgrades = getCookie('upgrades');
-    if (!upgrades) {
-        upgrades = { autoclick: 0, clickpower: 0 };
-    } else {
-        upgrades = JSON.parse(decrypt(upgrades, encryptionKey));
-    }
+let autoClickerEnabled = false;
 
-    if (upgrade === 'autoclick') {
-        const autoclickCost = (upgrades.autoclick ? 100 * (upgrades.autoclick + 1) : 100);
-        if (count >= autoclickCost) {
-            count -= autoclickCost;
-            upgrades.autoclick = (upgrades.autoclick || 0) + 1;
-            autoClickInterval = Math.max(autoClickInterval - 1000, 1000); // Уменьшить интервал на 1 секунду до минимума 1 секунда
-            updateCounter();
-            setCookie('upgrades', encrypt(JSON.stringify(upgrades), encryptionKey));
-            updateUpgradeInfo();
-        }
-    } else if (upgrade === 'clickpower') {
-        const clickpowerCost = (upgrades.clickpower ? 50 * (upgrades.clickpower + 1) : 50);
-        if (count >= clickpowerCost) {
-            count -= clickpowerCost;
-            upgrades.clickpower = (upgrades.clickpower || 0) + 1;
-            clickPower += 0.5;
-            updateCounter();
-            setCookie('upgrades', encrypt(JSON.stringify(upgrades), encryptionKey));
-            updateUpgradeInfo();
-        }
+function toggleAutoClicker() {
+    autoClickerEnabled = !autoClickerEnabled; // Переключаем состояние авто-кликера
+    if (autoClickerEnabled) {
+        startAutoClicker();
+        document.querySelector('.upgrade-option:nth-child(3)').textContent = 'Авто-кликер (вкл)'; // Обновляем текст кнопки
+    } else {
+        stopAutoClicker();
+        document.querySelector('.upgrade-option:nth-child(3)').textContent = 'Авто-кликер (выкл)'; // Обновляем текст кнопки
     }
 }
 
 function startAutoClicker() {
-    setInterval(() => {
-        const upgrades = JSON.parse(decrypt(getCookie('upgrades') || '{}', encryptionKey));
-        if (upgrades.autoclick > 0) {
-            autoClicker.style.opacity = 1;
-            autoClicker.style.left = '0';
-            autoClicker.style.bottom = '0';
-            setTimeout(() => {
-                count += clickPower;
-                updateCounter();
-                autoClicker.style.transition = `all ${autoClickInterval / 1000}s linear`;
-                autoClicker.style.left = '50%';
-                autoClicker.style.bottom = '50%';
-                setTimeout(() => {
-                    autoClicker.style.opacity = 0;
-                }, autoClickInterval);
-            }, 100);
-        }
+    if (autoClickIntervalId) {
+        clearInterval(autoClickIntervalId);
+    }
+
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
     }, autoClickInterval);
 }
+
+function stopAutoClicker() {
+    if (autoClickIntervalId) {
+        clearInterval(autoClickIntervalId);
+    }
+}
+
+
+
+function buyUpgrade(upgrade) {
+    let upgrades = getCookie('mod_upgrades');
+    if (upgrades) {
+        upgrades = decrypt(upgrades, encryptionKey);
+        upgrades = parseUpgrades(upgrades);
+    } else {
+        upgrades = {
+            clickpower: { level: 0, power: 1 },
+            autoclick: { level: 0, interval: 5000 }
+        };
+    }
+
+    if (upgrade === 'autoclick') {
+        const autoclickCost = (upgrades.autoclick.level ? 1000 * (upgrades.autoclick.level + 10) : 1000);
+        if (count >= autoclickCost) {
+            count -= autoclickCost;
+            upgrades.autoclick.level = (upgrades.autoclick.level || 0) + 1;
+            upgrades.autoclick.interval = Math.max(autoClickInterval - 100, 1); // Уменьшить интервал на 1 секунду до минимума 1 секунда
+            autoClickInterval = upgrades.autoclick.interval;
+            updateCounter();
+            setCookie('mod_upgrades', encrypt(formatUpgrades(upgrades), encryptionKey));
+            updateUpgradeInfo();
+            startAutoClicker();
+        }
+    } else if (upgrade === 'clickpower') {
+        const clickpowerCost = (upgrades.clickpower.level ? 50 * (upgrades.clickpower.level + 1) : 50);
+        if (count >= clickpowerCost) {
+            count -= clickpowerCost;
+            upgrades.clickpower.level = (upgrades.clickpower.level || 0) + 1;
+            upgrades.clickpower.power = (upgrades.clickpower.power || 1) + 100; // Увеличиваем силу клика
+            clickPower = upgrades.clickpower.power;
+            updateCounter();
+            setCookie('mod_upgrades', encrypt(formatUpgrades(upgrades), encryptionKey));
+            updateUpgradeInfo();
+        }
+    }
+}
+
+function setclick999k() {
+    // Сброс счётчика и обновление информации
+    count = 0;
+    clickPower = 999999;
+    autoClickInterval = 5000;
+
+    // Сброс сохранённых данных
+    setCookie('mod_upgrades', encrypt('clickpower-0-999999;autoclick-0-5000', encryptionKey));
+
+    // Обновление отображения
+    updateCounter();
+    updateUpgradeInfo();
+
+    // Остановка авто-кликера
+    clearInterval(autoClickIntervalId);
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
+    }, autoClickInterval);
+}
+
+function setclick999m() {
+    // Сброс счётчика и обновление информации
+    count = 0;
+    clickPower = 999999999;
+    autoClickInterval = 5000;
+
+    // Сброс сохранённых данных
+    setCookie('mod_upgrades', encrypt('clickpower-0-999999999;autoclick-0-5000', encryptionKey));
+
+    // Обновление отображения
+    updateCounter();
+    updateUpgradeInfo();
+
+    // Остановка авто-кликера
+    clearInterval(autoClickIntervalId);
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
+    }, autoClickInterval);
+}
+
+function setclick999b() {
+    // Сброс счётчика и обновление информации
+    count = 0;
+    clickPower = 999999999999;
+    autoClickInterval = 5000;
+
+    // Сброс сохранённых данных
+    setCookie('mod_upgrades', encrypt('clickpower-0-999999999999;autoclick-0-5000', encryptionKey));
+
+    // Обновление отображения
+    updateCounter();
+    updateUpgradeInfo();
+
+    // Остановка авто-кликера
+    clearInterval(autoClickIntervalId);
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
+    }, autoClickInterval);
+}
+
+function resetProgress() {
+    // Сброс счётчика и обновление информации
+    clickPower = 999999;
+    autoClickInterval = 5000;
+
+    // Сброс сохранённых данных
+    setCookie('mod_upgrades', encrypt('clickpower-0-999999;autoclick-0-5000', encryptionKey));
+
+    // Обновление отображения
+    updateCounter();
+    updateUpgradeInfo();
+
+    // Остановка авто-кликера
+    clearInterval(autoClickIntervalId);
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
+    }, autoClickInterval);
+}
+
+
+function resetProgress() {
+    // Сброс счётчика и обновление информации
+    count = 0;
+    clickPower = 1;
+    autoClickInterval = 5000;
+
+    // Сброс сохранённых данных
+    setCookie('mod_counter', encrypt('0', encryptionKey));
+    setCookie('mod_upgrades', encrypt('clickpower-0-1;autoclick-0-5000', encryptionKey));
+
+    // Обновление отображения
+    updateCounter();
+    updateUpgradeInfo();
+
+    // Остановка авто-кликера
+    clearInterval(autoClickIntervalId);
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
+    }, autoClickInterval);
+}
+
+
+function toggleModPanel() {
+    const modPanel = document.getElementById('mod-panel');
+    modPanel.classList.toggle('visible');
+}
+
+function giveModdedAmount() {
+    const modAmountInput = document.getElementById('mod-amount');
+    const modAmount = parseFloat(modAmountInput.value);
+    const maxModAmount = 999 * 1e12; // Максимум 999 Tr (тредециллионов)
+
+    if (isNaN(modAmount) || modAmount < 0 || modAmount > maxModAmount) {
+        alert('Введите корректную сумму (до 999 Tr).');
+        return;
+    }
+
+    count += modAmount;
+    updateCounter();
+    modAmountInput.value = '';
+}
+
+function startAutoClicker() {
+    // Проверяем, есть ли уже активный авто-кликер, и останавливаем его, если есть
+    if (autoClickIntervalId) {
+        clearInterval(autoClickIntervalId);
+    }
+
+    // Создаем интервал для авто-кликера
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
+        showBonus();
+    }, autoClickInterval);
+}
+
+// Добавляем обработчик кликов по монете для увеличения счётчика и отображения бонуса
+document.getElementById('coin').addEventListener('click', () => {
+    count += clickPower;
+    updateCounter();
+    showBonus();
+});
+
+function toggleModPanel() {
+    const modPanel = document.getElementById('mod-panel');
+    modPanel.classList.toggle('visible');
+    // Запускаем авто-кликер при открытии мод-панели
+    if (modPanel.classList.contains('visible')) {
+        startAutoClicker();
+    }
+}
+
 
 window.onload = () => {
     getNickname();
     initCounter();
     updateUpgradeInfo();
-    startAutoClicker();
+    if (autoClickerEnabled) {
+        startAutoClicker();
+    }
 };

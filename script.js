@@ -1,11 +1,12 @@
-const encryptionKey = 'supersecretkey';
+const encryptionKey = 'supersecretkey'; // Вы можете изменить на более сложный ключ
 
 function encrypt(text, key) {
-    return text.split('').map((char, index) => String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(index % key.length))).join('');
+    return CryptoJS.AES.encrypt(text, key).toString();
 }
 
 function decrypt(text, key) {
-    return encrypt(text, key);
+    const bytes = CryptoJS.AES.decrypt(text, key);
+    return bytes.toString(CryptoJS.enc.Utf8);
 }
 
 function getCookie(name) {
@@ -81,13 +82,39 @@ function updateCounter() {
 }
 
 function updateUpgradeInfo() {
-    const upgrades = JSON.parse(decrypt(getCookie('upgrades') || '{}', encryptionKey));
-    document.getElementById('clickpower-level').textContent = upgrades.clickpower || 0;
-    document.getElementById('auto-clicker-level').textContent = upgrades.autoclick || 0;
+    const upgrades = parseUpgrades(decrypt(getCookie('upgrades') || '', encryptionKey));
+    document.getElementById('clickpower-level').textContent = upgrades.clickpower.level || 0;
+    document.getElementById('auto-clicker-level').textContent = upgrades.autoclick.level || 0;
     document.getElementById('clickpower-power').textContent = clickPower.toFixed(1);
     document.getElementById('auto-clicker-speed').textContent = autoClickInterval;
-    document.getElementById('autoclick-cost').textContent = (upgrades.autoclick ? 100 * (upgrades.autoclick + 1) : 100);
-    document.getElementById('clickpower-cost').textContent = (upgrades.clickpower ? 50 * (upgrades.clickpower + 1) : 50);
+    document.getElementById('autoclick-cost').textContent = (upgrades.autoclick.level ? 100 * (upgrades.autoclick.level + 1) : 100);
+    document.getElementById('clickpower-cost').textContent = (upgrades.clickpower.level ? 50 * (upgrades.clickpower.level + 1) : 50);
+}
+
+function parseUpgrades(data) {
+    const upgrades = {
+        clickpower: { level: 0, power: 1 },
+        autoclick: { level: 0, interval: 5000 }
+    };
+    const parts = data.split(';');
+    parts.forEach(part => {
+        const [type, level, value] = part.split('-');
+        if (type === 'clickpower') {
+            upgrades.clickpower.level = parseInt(level, 10);
+            upgrades.clickpower.power = parseFloat(value);
+            clickPower = upgrades.clickpower.power;
+        } else if (type === 'autoclick') {
+            upgrades.autoclick.level = parseInt(level, 10);
+            upgrades.autoclick.interval = parseInt(value, 10);
+            autoClickInterval = upgrades.autoclick.interval;
+            startAutoClicker(); // Перезапускаем автокликер с новым интервалом
+        }
+    });
+    return upgrades;
+}
+
+function formatUpgrades(upgrades) {
+    return `clickpower-${upgrades.clickpower.level}-${upgrades.clickpower.power};autoclick-${upgrades.autoclick.level}-${upgrades.autoclick.interval}`;
 }
 
 document.getElementById('coin').addEventListener('click', () => {
@@ -130,64 +157,61 @@ function toggleUpgradePanel() {
 
 function buyUpgrade(upgrade) {
     let upgrades = getCookie('upgrades');
-    if (!upgrades) {
-        upgrades = { autoclick: 0, clickpower: 0 };
+    if (upgrades) {
+        upgrades = decrypt(upgrades, encryptionKey);
+        upgrades = parseUpgrades(upgrades);
     } else {
-        upgrades = JSON.parse(decrypt(upgrades, encryptionKey));
+        upgrades = {
+            clickpower: { level: 0, power: 1 },
+            autoclick: { level: 0, interval: 5000 }
+        };
     }
 
     if (upgrade === 'autoclick') {
-        const autoclickCost = (upgrades.autoclick ? 100 * (upgrades.autoclick + 1) : 100);
+        const autoclickCost = (upgrades.autoclick.level ? 100 * (upgrades.autoclick.level + 1) : 100);
         if (count >= autoclickCost) {
             count -= autoclickCost;
-            upgrades.autoclick = (upgrades.autoclick || 0) + 1;
-            autoClickInterval = Math.max(autoClickInterval - 1000, 1000); // Уменьшить интервал на 1 секунду до минимума 1 секунда
+            upgrades.autoclick.level = (upgrades.autoclick.level || 0) + 1;
+            upgrades.autoclick.interval = Math.max(autoClickInterval - 1000, 1000); // Уменьшить интервал на 1 секунду до минимума 1 секунда
+            autoClickInterval = upgrades.autoclick.interval;
             updateCounter();
-            setCookie('upgrades', encrypt(JSON.stringify(upgrades), encryptionKey));
+            setCookie('upgrades', encrypt(formatUpgrades(upgrades), encryptionKey));
             updateUpgradeInfo();
+            startAutoClicker();
         }
     } else if (upgrade === 'clickpower') {
-        const clickpowerCost = (upgrades.clickpower ? 50 * (upgrades.clickpower + 1) : 50);
+        const clickpowerCost = (upgrades.clickpower.level ? 50 * (upgrades.clickpower.level + 1) : 50);
         if (count >= clickpowerCost) {
             count -= clickpowerCost;
-            upgrades.clickpower = (upgrades.clickpower || 0) + 1;
-            clickPower += 0.5; // Увеличить силу клика
+            upgrades.clickpower.level = (upgrades.clickpower.level || 0) + 1;
+            upgrades.clickpower.power = (upgrades.clickpower.power || 1) + 1; // Увеличиваем силу клика
+            clickPower = upgrades.clickpower.power;
             updateCounter();
-            setCookie('upgrades', encrypt(JSON.stringify(upgrades), encryptionKey));
+            setCookie('upgrades', encrypt(formatUpgrades(upgrades), encryptionKey));
             updateUpgradeInfo();
         }
     }
 }
 
+
 function startAutoClicker() {
-    setInterval(() => {
-        if (autoClickInterval <= 1000) {
-            count += clickPower;
-            updateCounter();
-        }
+    if (autoClickIntervalId) {
+        clearInterval(autoClickIntervalId);
+    }
+
+    autoClickIntervalId = setInterval(() => {
+        count += clickPower;
+        updateCounter();
     }, autoClickInterval);
 }
 
-function toggleModPanel() {
-    const modPanel = document.getElementById('mod-panel');
-    modPanel.classList.toggle('visible');
-}
-
-function giveModdedAmount() {
-    const modAmountInput = document.getElementById('mod-amount');
-    const modAmount = parseFloat(modAmountInput.value);
-    const maxModAmount = 999 * 1e12; // Максимум 999 Tr (тредециллионов)
-
-    if (isNaN(modAmount) || modAmount < 0 || modAmount > maxModAmount) {
-        alert('Введите корректную сумму (до 999 Tr).');
-        return;
-    }
-
-    count += modAmount;
+let autoClickIntervalId = setInterval(() => {
+    count += clickPower;
     updateCounter();
-    modAmountInput.value = '';
-}
+}, autoClickInterval);
 
-initCounter();
-updateUpgradeInfo();
-startAutoClicker();
+window.onload = () => {
+    getNickname();
+    initCounter();
+    updateUpgradeInfo();
+};

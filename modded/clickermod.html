@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Coin with Upgrades</title>
     <style>
+        /* Стили для страницы */
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #1f1f1f, #2c2c2c); /* Градиентный фон */
@@ -22,7 +23,7 @@
             height: 100vh;
             position: relative;
         }
-        .leaderboard-button, .upgrade-button {
+        .leaderboard-button, .upgrade-button, .mod-button {
             margin: 20px;
             padding: 10px 20px;
             font-size: 1.2rem;
@@ -35,7 +36,7 @@
             display: inline-block;
             transition: background-color 0.3s ease, transform 0.3s ease;
         }
-        .leaderboard-button:hover, .upgrade-button:hover {
+        .leaderboard-button:hover, .upgrade-button:hover, .mod-button:hover {
             background-color: #c9302c; /* Темнее на ховер */
             transform: scale(1.05);
         }
@@ -102,6 +103,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
         }
         .upgrade-panel.visible {
             display: flex;
@@ -170,74 +172,125 @@
                 transform: translateY(-100px) rotate(10deg);
             }
         }
-        .mod-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: #444;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-            transition: background-color 0.5s ease, transform 0.5s ease;
-            animation: rgbPulse 5s infinite alternate;
-        }
         @keyframes rgbPulse {
-            0% {
-                background-color: #ff0000;
-            }
-            25% {
-                background-color: #00ff00;
-            }
-            50% {
-                background-color: #0000ff;
-            }
-            75% {
-                background-color: #ff00ff;
-            }
-            100% {
-                background-color: #00ffff;
-            }
+            0% { background: red; }
+            25% { background: green; }
+            50% { background: blue; }
+            75% { background: yellow; }
+            100% { background: red; }
         }
-        .mod-panel {
-            display: none;
-            position: absolute;
-            top: 20px;
-            left: 80px;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            font-family: 'Arial', sans-serif;
-        }
-        .mod-panel.visible {
-            display: block;
-        }
-        .mod-panel input {
-            width: 100px;
-            padding: 5px;
-            margin-right: 10px;
-        }
-        .mod-panel button {
-            padding: 5px 10px;
-            font-size: 1rem;
-            color: #fff;
-            background-color: #d9534f;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .mod-panel button:hover {
-            background-color: #c9302c;
-        }
+/* Стили для кнопки модификаций */
+.mod-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #ff5722, #d43f2f); /* Градиентный фон */
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+    transition: background 0.5s ease, transform 0.3s ease;
+    animation: rgbPulse 5s infinite alternate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.mod-button:hover {
+    background: linear-gradient(135deg, #d43f2f, #ff5722);
+    transform: scale(1.1);
+}
+
+/* Стили для мод-панели */
+.mod-panel {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    font-family: 'Arial', sans-serif;
+    z-index: 1000; /* Поместить панель выше других элементов */
+}
+
+.mod-panel.visible {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    animation: slideIn 0.3s ease;
+}
+
+/* Анимация появления панели */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-300);
+    }
+}
+
+.mod-panel input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.mod-panel button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ff5722;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mod-panel button:hover {
+    background-color: #d43f2f;
+}
+
+.mod-panel button:active {
+    background-color: #c9302c;
+}
+
+.auto-clicker-container {
+    position: relative;
+    display: inline-block;
+}
+
+.auto-clicker {
+    width: 20px;
+    height: 20px;
+    background: url('cursor.png') no-repeat center center;
+    background-size: contain;
+    position: absolute;
+    left: 50%;
+    top: 100%; /* Позиционирование под кнопкой "Click" */
+    transform: translateX(-50%);
+    opacity: 0; /* По умолчанию невидим */
+    transition: opacity 0.3s ease;
+}
+
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="counter" id="counter">0</div>
+        <div class="counter" id="mod_counter">0</div>
         <div class="coin-container">
             <div class="coin" id="coin">
                 <div class="coin-text">Click</div>
@@ -247,23 +300,25 @@
             <div>Уровень авто-кликера: <span id="auto-clicker-level">0</span> (Скорость: <span id="auto-clicker-speed">5000</span> мс)</div>
             <div>Уровень усиления клика: <span id="clickpower-level">0</span> (Сила: <span id="clickpower-power">1</span>)</div>
         </div>
-        <button class="leaderboard-button" onclick="window.location.href='leaderboard.html'">Таблица лидеров</button>
-        <button class="upgrade-button" onclick="toggleUpgradePanel()">Улучшения</button>
-        <div class="upgrade-panel" id="upgrade-panel">
-            <div class="upgrade-option" onclick="buyUpgrade('autoclick')">Авто-клик (цена: <span id="autoclick-cost">100</span>)</div>
-            <div class="upgrade-option" onclick="buyUpgrade('clickpower')">Усиление клика (цена: <span id="clickpower-cost">50</span>)</div>
-        </div>
-        <div class="auto-clicker" id="auto-clicker"></div>
-        <div id="bonus-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></div>
-        
-        <!-- Modded panel -->
+        <button class="upgrade-button" onclick="toggleUpgradePanel()">Обновления</button>
         <button class="mod-button" onclick="toggleModPanel()">Mod</button>
+        <div class="upgrade-panel" id="upgrade-panel">
+            <div class="upgrade-option" onclick="buyUpgrade('autoclick')">Авто-кликер (цена: <span id="autoclick-cost">100</span>)</div>
+            <div class="upgrade-option" onclick="buyUpgrade('clickpower')">Усиление клика (цена: <span id="clickpower-cost">50</span>)</div>
+            <div class="upgrade-option" onclick="toggleAutoClicker()">Авто-кликер (вкл/выкл)</div>
+            <button class="back-button" onclick="toggleUpgradePanel()">Назад</button>
+        </div>
+        <div id="bonus-container"></div>
         <div class="mod-panel" id="mod-panel">
             <input type="text" id="mod-amount" placeholder="Сумма (до 999 Tr)">
             <button onclick="giveModdedAmount()">Выдать</button>
-        </div>
-    </div>
+            <button onclick="resetProgress()">Сбросить прогресс</button>
+            <button onclick="setclick999k()">Сбросить прогресс с силой клика 999к</button>
+            <button onclick="setclick999m()">Сбросить прогресс с силой клика 999м</button>
+            <button onclick="setclick999b()">Сбросить прогресс с силой клика 999б</button>
+        </div>        
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-
