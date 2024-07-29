@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: #2c2c2c;
-            color: #f5f5f5;
+            background: #1c1c1c;
+            color: #e6e6e6;
             text-align: center;
             margin: 0;
             padding: 20px;
@@ -25,29 +25,30 @@
         }
         th {
             background: #333;
-            color: #f5f5f5;
+            color: #e6e6e6;
         }
         tr:nth-child(even) {
-            background: #3a3a3a;
+            background: #2c2c2c;
         }
         tr:hover {
-            background: #555;
+            background: #444;
         }
         .back-button {
             margin: 20px;
             padding: 10px 20px;
             font-size: 1.2rem;
-            color: #ffffff;
-            background-color: #ff5722;
+            color: #fff;
+            background-color: #d9534f; /* Опиумный красный */
             border: none;
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
         .back-button:hover {
-            background-color: #e64a19;
+            background-color: #c9302c; /* Темнее на ховер */
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -56,16 +57,16 @@
     <table>
         <thead>
             <tr>
-                <th>IP-адрес</th>
+                <th>Никнейм</th>
                 <th>Счёт</th>
             </tr>
         </thead>
         <tbody>
             <?php
             // Подключение к базе данных
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
+            $servername = "89.23.117.121";
+            $username = "ImInsane";
+            $password = "Fade3322"; // Укажите свой пароль
             $dbname = "leaderboard";
 
             // Создание подключения
@@ -77,13 +78,13 @@
             }
 
             // Запрос на получение данных из таблицы
-            $sql = "SELECT ip, score FROM scores ORDER BY score DESC";
+            $sql = "SELECT nickname, score FROM scores ORDER BY score DESC";
             $result = $conn->query($sql);
 
             // Отображение данных в таблице
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    echo "<tr><td>" . htmlspecialchars($row['ip']) . "</td><td>" . htmlspecialchars($row['score']) . "</td></tr>";
+                    echo "<tr><td>" . htmlspecialchars($row['nickname']) . "</td><td>" . htmlspecialchars($row['score']) . "</td></tr>";
                 }
             } else {
                 echo "<tr><td colspan='2'>Нет данных</td></tr>";
