@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Text</title>
+    <style>
+        /* Основные стили для тела страницы */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4); /* Градиентный фон */
+            font-family: 'Arial', sans-serif;
+            color: #ffffff; /* Цвет текста */
+            overflow: hidden; /* Скрыть прокрутку */
+        }
+
+        /* Стиль для текста */
+        .fullscreen-text {
+            font-size: 10vw; /* Размер шрифта относительно ширины окна */
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 5px 5px 20px rgba(0, 0, 0, 0.6); /* Тень для текста */
+            transition: transform 0.3s ease, color 0.3s ease; /* Плавные переходы для анимации */
+        }
+
+        /* Эффект при наведении */
+        body:hover .fullscreen-text {
+            color: #ff5722; /* Цвет текста при наведении */
+            transform: scale(1.1); /* Увеличение текста при наведении */
+        }
+    </style>
+</head>
+<body>
+    <div class="fullscreen-text">anus</div>
+</body>
+</html>
