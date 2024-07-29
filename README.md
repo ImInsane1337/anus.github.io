@@ -1,2 +1,0 @@
-# anus.github.io
-anus
