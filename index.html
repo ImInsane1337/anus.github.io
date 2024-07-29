@@ -5,99 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roblox Coin Clicker</title>
     <style>
-    /* Основные стили для страницы */
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #6e1f29, #d9a81f); /* Градиентный фон в теплых тонах */
-        color: #f5f5f5; /* Светлый цвет текста */
-        text-align: center;
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
+        /* Основные стили для страницы */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6e1f29, #d9a81f); /* Градиентный фон в теплых тонах */
+            color: #f5f5f5; /* Светлый цвет текста */
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    h1 {
-        font-size: 3em;
-        color: #f5c542; /* Теплый золотистый цвет */
-        margin-bottom: 0.5em;
-    }
+        h1 {
+            font-size: 3em;
+            color: #f5c542; /* Теплый золотистый цвет */
+            margin-bottom: 0.5em;
+        }
 
-    #coin-count {
-        font-size: 3em;
-        color: #f5c542; /* Тот же теплый цвет для чисел */
-        margin: 1em 0;
-    }
+        #coin-count {
+            font-size: 3em;
+            color: #f5c542; /* Тот же теплый цвет для чисел */
+            margin: 1em 0;
+        }
 
-    #click-button {
-        background: #d9a81f; /* Тот же теплый цвет для кнопки */
-        color: #f5f5f5;
-        border: none;
-        padding: 1em 2em;
-        font-size: 1.5em;
-        cursor: pointer;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        transition: background 0.3s ease;
-    }
+        #click-area {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #d9a81f; /* Тот же теплый цвет для кружка */
+            margin: 2em auto;
+            line-height: 150px;
+            font-size: 1.5em;
+            color: #f5f5f5;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s ease;
+        }
 
-    #click-button:hover {
-        background: #f5c542; /* При наведении кнопка становится чуть ярче */
-    }
+        #click-area:active {
+            background: #f5c542; /* При нажатии кружок становится чуть ярче */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
 
-    #login-form {
-        margin-top: 2em;
-        padding: 1em;
-        background: rgba(0, 0, 0, 0.6);
-        border-radius: 10px;
-        display: inline-block;
-    }
+        @keyframes clickAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
 
-    #username {
-        padding: 0.5em;
-        border: none;
-        border-radius: 5px;
-        margin-right: 1em;
-        font-size: 1em;
-        width: 200px;
-        color: #333;
-    }
+        .clicked {
+            animation: clickAnimation 0.3s ease;
+        }
 
-    #register-button {
-        background: #d9a81f;
-        color: #f5f5f5;
-        border: none;
-        padding: 0.5em 1.5em;
-        font-size: 1em;
-        cursor: pointer;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        transition: background 0.3s ease;
-    }
+        #login-form {
+            margin-top: 2em;
+            padding: 1em;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            display: inline-block;
+        }
 
-    #register-button:hover {
-        background: #f5c542; /* При наведении кнопка становится чуть ярче */
-    }
-</style>
+        #username {
+            padding: 0.5em;
+            border: none;
+            border-radius: 5px;
+            margin-right: 1em;
+            font-size: 1em;
+            width: 200px;
+            color: #333;
+        }
+
+        #register-button {
+            background: #d9a81f;
+            color: #f5f5f5;
+            border: none;
+            padding: 0.5em 1.5em;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s ease;
+        }
+
+        #register-button:hover {
+            background: #f5c542; /* При наведении кнопка становится чуть ярче */
+        }
+    </style>
 </head>
 <body>
-    <h1>Roblox Coin Clicker</h1>
-    <div id="coin-count">0</div>
-    <button id="click-button">Click me!</button>
     <div id="login-form">
         <input type="text" id="username" placeholder="Enter your username">
         <button id="register-button">Register</button>
     </div>
-    
+    <h1>Roblox Coin Clicker</h1>
+    <div id="coin-count">0</div>
+    <div id="click-area">Click!</div>
+
     <script>
-        const clickButton = document.getElementById('click-button');
+        const clickArea = document.getElementById('click-area');
         const coinCount = document.getElementById('coin-count');
         const registerButton = document.getElementById('register-button');
         const usernameInput = document.getElementById('username');
 
         let coins = 0;
+        let registered = false;
 
         function updateCoins() {
             fetch('get_coins.php')
@@ -116,26 +131,39 @@
             });
         }
 
-        clickButton.addEventListener('click', () => {
-            coins++;
-            coinCount.textContent = coins;
-            saveCoins();
-        });
-
-        registerButton.addEventListener('click', () => {
+        function registerUser() {
             const username = usernameInput.value;
             if (username) {
                 fetch('register.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `username=${username}`
-                }).then(() => updateCoins());
+                }).then(() => {
+                    registered = true;
+                    updateCoins();
+                    document.getElementById('login-form').style.display = 'none';
+                });
+            }
+        }
+
+        clickArea.addEventListener('click', () => {
+            if (registered) {
+                coins++;
+                coinCount.textContent = coins;
+                saveCoins();
+                clickArea.classList.add('clicked');
+                setTimeout(() => clickArea.classList.remove('clicked'), 300); // Убираем анимацию через 300 мс
+            } else {
+                alert('You must register first!');
             }
         });
 
+        registerButton.addEventListener('click', registerUser);
+
         setInterval(saveCoins, 5000); // Сохраняем монеты каждые 5 секунд
 
-        updateCoins(); // Загружаем монеты при загрузке страницы
+        // Пытаемся загрузить монеты при загрузке страницы, если пользователь уже зарегистрирован
+        updateCoins();
     </script>
 </body>
 </html>
