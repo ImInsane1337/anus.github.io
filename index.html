@@ -3,167 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Coin Clicker</title>
+    <title>Interactive Coin with Leaderboard</title>
     <style>
-        /* Основные стили для страницы */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #6e1f29, #d9a81f); /* Градиентный фон в теплых тонах */
-            color: #f5f5f5; /* Светлый цвет текста */
+            font-family: 'Arial', sans-serif;
+            background: #0f0f0f; /* Темный фон */
+            color: #d1cfcf; /* Светлый цвет текста */
             text-align: center;
             margin: 0;
             padding: 0;
-            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 1)), url('your-background-image.jpg') no-repeat center center fixed; /* Опиумный фон */
+            background-size: cover;
         }
-
-        h1 {
-            font-size: 3em;
-            color: #f5c542; /* Теплый золотистый цвет */
-            margin-bottom: 0.5em;
+        .leaderboard-button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #fff;
+            background-color: #d9534f; /* Опиумный красный */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
-
-        #coin-count {
-            font-size: 3em;
-            color: #f5c542; /* Тот же теплый цвет для чисел */
-            margin: 1em 0;
+        .leaderboard-button:hover {
+            background-color: #c9302c; /* Темнее на ховер */
+            transform: scale(1.05);
         }
-
-        #click-area {
+        .counter {
+            font-size: 3rem;
+            margin-top: 20px;
+            color: #e6b800; /* Яркий цвет счётчика */
+            text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.8); /* Тень текста */
+        }
+        .coin-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .coin {
             width: 150px;
             height: 150px;
+            background: radial-gradient(circle, #ff5722, #d43f2f); /* Градиент цвета */
             border-radius: 50%;
-            background: #d9a81f; /* Тот же теплый цвет для кружка */
-            margin: 2em auto;
-            line-height: 150px;
-            font-size: 1.5em;
-            color: #f5f5f5;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: background 0.3s ease;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 87, 34, 0.8); /* Эффект свечения */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
-        #click-area:active {
-            background: #f5c542; /* При нажатии кружок становится чуть ярче */
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        .coin:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 87, 34, 1);
         }
-
-        @keyframes clickAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .coin-text {
+            font-size: 1.5rem;
+            color: #fff;
+            user-select: none;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6); /* Тень текста */
         }
-
-        .clicked {
-            animation: clickAnimation 0.3s ease;
-        }
-
-        #login-form {
-            margin-top: 2em;
-            padding: 1em;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
+        .back-button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #fff;
+            background-color: #d9534f; /* Опиумный красный */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
             display: inline-block;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
-
-        #username {
-            padding: 0.5em;
-            border: none;
-            border-radius: 5px;
-            margin-right: 1em;
-            font-size: 1em;
-            width: 200px;
-            color: #333;
+        .back-button:hover {
+            background-color: #c9302c; /* Темнее на ховер */
+            transform: scale(1.05);
         }
-
-        #register-button {
-            background: #d9a81f;
-            color: #f5f5f5;
-            border: none;
-            padding: 0.5em 1.5em;
-            font-size: 1em;
-            cursor: pointer;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: background 0.3s ease;
-        }
-
-        #register-button:hover {
-            background: #f5c542; /* При наведении кнопка становится чуть ярче */
+        .blurred-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Полупрозрачный серый фон */
+            z-index: -1;
         }
     </style>
 </head>
 <body>
-    <div id="login-form">
-        <input type="text" id="username" placeholder="Enter your username">
-        <button id="register-button">Register</button>
+    <div class="container">
+        <div class="counter" id="counter">0</div>
+        <div class="coin-container">
+            <div class="coin" id="coin">
+                <div class="coin-text">anus</div>
+            </div>
+        </div>
+        <button class="leaderboard-button" onclick="window.location.href='leaderboard.php'">Таблица лидеров</button>
+        <div class="blurred-overlay"></div>
     </div>
-    <h1>Roblox Coin Clicker</h1>
-    <div id="coin-count">0</div>
-    <div id="click-area">Click!</div>
 
     <script>
-        const clickArea = document.getElementById('click-area');
-        const coinCount = document.getElementById('coin-count');
-        const registerButton = document.getElementById('register-button');
-        const usernameInput = document.getElementById('username');
-
-        let coins = 0;
-        let registered = false;
-
-        function updateCoins() {
-            fetch('get_coins.php')
-                .then(response => response.text())
-                .then(data => {
-                    coins = parseInt(data) || 0;
-                    coinCount.textContent = coins;
-                });
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (const cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.split('=');
+                if (cookieName.trim() === name) {
+                    return cookieValue.trim();
+                }
+            }
+            return null;
         }
 
-        function saveCoins() {
-            fetch('save_coins.php', {
+        function setCookie(name, value) {
+            document.cookie = `${name}=${value}; path=/;`;
+        }
+
+        function askForNickname() {
+            let nickname = prompt('Введите ваш никнейм:');
+            while (!nickname) {
+                nickname = prompt('Никнейм не может быть пустым. Введите ваш никнейм:');
+            }
+            setCookie('nickname', nickname);
+            return nickname;
+        }
+
+        function getNickname() {
+            return getCookie('nickname') || askForNickname();
+        }
+
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num;
+        }
+
+        function updateScore() {
+            const count = parseInt(document.getElementById('counter').textContent, 10);
+            const nickname = getNickname();
+
+            fetch('updateScore.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `coins=${coins}`
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ score: count, nickname: nickname }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'success') {
+                    console.error('Ошибка обновления счёта:', data.message);
+                }
             });
         }
 
-        function registerUser() {
-            const username = usernameInput.value;
-            if (username) {
-                fetch('register.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `username=${username}`
-                }).then(() => {
-                    registered = true;
-                    updateCoins();
-                    document.getElementById('login-form').style.display = 'none';
-                });
-            }
-        }
-
-        clickArea.addEventListener('click', () => {
-            if (registered) {
-                coins++;
-                coinCount.textContent = coins;
-                saveCoins();
-                clickArea.classList.add('clicked');
-                setTimeout(() => clickArea.classList.remove('clicked'), 300); // Убираем анимацию через 300 мс
-            } else {
-                alert('You must register first!');
-            }
+        document.getElementById('coin').addEventListener('click', () => {
+            let count = parseInt(document.getElementById('counter').textContent, 10);
+            if (isNaN(count)) count = 0;
+            count++;
+            document.getElementById('counter').textContent = formatNumber(count);
         });
 
-        registerButton.addEventListener('click', registerUser);
+        // Обновление счётчика каждые 5 секунд
+        setInterval(updateScore, 5000);
 
-        setInterval(saveCoins, 5000); // Сохраняем монеты каждые 5 секунд
-
-        // Пытаемся загрузить монеты при загрузке страницы, если пользователь уже зарегистрирован
-        updateCoins();
+        // Инициализация счётчика при загрузке страницы
+        function initCounter() {
+            const count = getCookie('counter');
+            document.getElementById('counter').textContent = count ? formatNumber(parseInt(count, 10)) : '0';
+        }
+        initCounter();
     </script>
 </body>
 </html>
